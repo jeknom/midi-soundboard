@@ -4,7 +4,7 @@ So you have a MIDI board and would like to use it as a soundboard? Well, this is
 
 <img src="./logo.webp" alt='Logo with cartoony MIDI keyboard in it' width="300" />
 
-## How to use?
+## Setup
 
 1. Download repo
 2. Go to repo dir
@@ -23,11 +23,15 @@ VOLUME = 0.1
 RETRIGGER_DELAY_MS = 200
 ```
 
-7. Run `yarn start`
-8. Click a key on your MIDI board and follow instructions to assign it
-9. Click the key again to hear the sound
+## Usage
 
+1. Open terminal and run `yarn start`
+2. Wait for the app to signal that it's ready for input
+3. Click a key on your MIDI board, follow instructions to assign it
+4. Click the key again to play the sound
+5. Hold the key for 5 seconds, then release it to rebind the key
 
 ## Good to know
 
-The app saves your bindings in `save.json`. You can edit it or remove keys/the file to make the app forget bindings.
+- The app saves your bindings in `save.json`. You can edit it or remove keys/the file to make the app forget bindings.
+- I've only tested the app with .mp3 files, others could work as well

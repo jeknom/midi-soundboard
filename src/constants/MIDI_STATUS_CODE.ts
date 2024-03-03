@@ -1,0 +1,2 @@
+export const MIDI_STATUS_CODE_KEY_UP = 128
+export const MIDI_STATUS_CODE_KEY_DOWN = 144
