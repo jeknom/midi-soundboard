@@ -9,7 +9,7 @@ import { Config, ConfigSchema } from "./types/config"
 import os from 'os'
 import { exec } from 'child_process'
 import { listFiles } from "./utils/listFiles"
-import { KeyPressMeta } from "./types/keyPressMeta"
+import { KeyPressMeta } from "./types/KeyPressMeta"
 import { secondsDifference } from "./utils/secondsDifference"
 import dotenv from 'dotenv'
 import { error, info, warning } from "./utils/log"
@@ -146,13 +146,20 @@ class Soundboard {
                     resolve(filenames[res.selectedIndex])
                 })
             })
+
+            const newClip = { key, filePath: `${this.config.ASSETS_PATH}/${selected}` }
+            const bindings = this.save?.bindings ?? []
+            
+            let keyIndex = bindings.findIndex(b => b.key === key)
+            if (keyIndex !== -1) {
+                bindings[keyIndex] = newClip
+            } else {
+                bindings.push(newClip)
+            }
         
             const newUserSave: UserSave = {
                 ...this.save,
-                bindings: [
-                    ...this.save?.bindings ?? [],
-                    { key, filePath: `${this.config.ASSETS_PATH}/${selected}` }
-                ]
+                bindings,
             }
         
             await this.updateSave(newUserSave)
