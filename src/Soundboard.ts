@@ -7,7 +7,7 @@ import { readJsonFile } from "./utils/readJsonFile"
 import { writeJsonFile } from "./utils/writeJsonFile"
 import { Config, ConfigSchema } from "./types/config"
 import os from 'os'
-import { exec } from 'child_process'
+import { ChildProcess, exec } from 'child_process'
 import { listFiles } from "./utils/listFiles"
 import { KeyPressMeta } from "./types/KeyPressMeta"
 import { secondsDifference } from "./utils/secondsDifference"
@@ -15,12 +15,14 @@ import dotenv from 'dotenv'
 import { error, info, warning } from "./utils/log"
 
 const MEMORY_SAVE_FILE_UNAVAILABLE_ERROR = 'In memory save was unexpectedly not available'
-const REBIND_KEY_PRESS_AFTER_SECONDS = 5
+const REBIND_KEY_PRESS_AFTER_SECONDS = parseInt(process.env.REBIND_KEY_PRESS_AFTER_SECONDS ?? '3')
+const MAX_PROCESS_HISTORY = parseInt(process.env.MAX_PROCESS_HISTORY ?? '5')
 
 class Soundboard {
     private save: UserSave | null = null
     private config: Config = DEFAULT_CONFIG
     
+    private processHistory: ChildProcess[] = []
     private lastKeyPressMeta: KeyPressMeta | null = null
     private donotplay = false
 
@@ -40,6 +42,16 @@ class Soundboard {
         }
         
         this.loadSave()
+
+        process.stdin.on('keypress', (_, key) => {
+            if (key.name === 's') {
+                for (const process of this.processHistory) {
+                    process?.kill()
+                }
+
+                this.processHistory = []
+            }
+        })
     }
 
     public async waitForReady() {
@@ -103,16 +115,19 @@ class Soundboard {
                     process.exit(1);
             }
 
-            exec(command, (error) => {
+            const newProcess = exec(command, (error) => {
                 if (error) {
                 console.error(`exec error: ${error}`);
                 return;
                 }
             })
-        } else {
-            info(`No matching bind for key ${pressedKey}, select a clip for it.`)
-    
-            await this.bindKey(pressedKey)
+
+            if (this.processHistory.length > MAX_PROCESS_HISTORY) {
+                const oldestProcess = this.processHistory.shift()
+                oldestProcess?.kill()
+            }
+
+            this.processHistory.push(newProcess)
         }
     }
 
@@ -127,7 +142,7 @@ class Soundboard {
         if (isSameKey && timeSinceLastPressSeconds >= REBIND_KEY_PRESS_AFTER_SECONDS) {
             await this.bindKey(key.toString())
         } else {
-            info(`You pressed the key for ${timeSinceLastPressSeconds} seconds, press for ${REBIND_KEY_PRESS_AFTER_SECONDS} seconds to rebind.`)
+            info(`You pressed the key for ${timeSinceLastPressSeconds} seconds, press for ${REBIND_KEY_PRESS_AFTER_SECONDS} seconds to set new clip.`)
         }
     }
 

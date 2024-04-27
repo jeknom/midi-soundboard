@@ -21,17 +21,23 @@ VOLUME = 0.1
 
 # How often you can play sounds in milliseconds
 RETRIGGER_DELAY_MS = 200
+
+# How long you need to press to bind a key
+REBIND_KEY_PRESS_AFTER_SECONDS = 3
+
+# How many sounds can be played simultaneously, oldest will cease to play
+MAX_PROCESS_HISTORY = 5
 ```
 
 ## Usage
 
 1. Open terminal and run `yarn start`
 2. Wait for the app to signal that it's ready for input
-3. Click a key on your MIDI board, follow instructions to assign it
+3. Click a key on your MIDI board for 3 seconds, release, bind a sound (works for rebind too)
 4. Click the key again to play the sound
-5. Hold the key for 5 seconds, then release it to rebind the key
 
 ## Good to know
 
-- The app saves your bindings in `save.json`. You can edit it or remove keys/the file to make the app forget bindings.
+- You can cancel binding by hitting ESC
+- The app saves your bindings in `save.json`
 - I've only tested the app with .mp3 files, others could work as well
