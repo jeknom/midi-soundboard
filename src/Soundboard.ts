@@ -115,11 +115,24 @@ class Soundboard {
                     process.exit(1);
             }
 
-            const newProcess = exec(command, (error) => {
-                if (error) {
-                console.error(`exec error: ${error}`);
-                return;
+            const newProcess = exec(command, (e) => {
+                if (!e) {
+                    return
                 }
+
+                if (!e.killed) {
+                    error(`exec error: ${e.message}`);
+                } else {
+                    warning(`Process for ${filename} has been killed. Max process history was reached.`)
+                }
+            })
+
+            newProcess.on('exit', () => {
+                if (!this.processHistory.includes(newProcess)) {
+                    return
+                }
+                
+                this.processHistory = this.processHistory.filter(p => p !== newProcess)
             })
 
             if (this.processHistory.length > MAX_PROCESS_HISTORY) {
